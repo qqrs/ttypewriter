@@ -4,9 +4,7 @@ import os
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
-DEBUG = 0
-last_read = 0
-tolerance = 5
+DEBUG = 1
 
 # read SPI data from MCP3008 chip, 8 possible adc's (0 thru 7)
 def readadc(adcnum, clockpin, mosipin, misopin, cspin):
@@ -43,8 +41,33 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
         adcout /= 2       # first bit is 'null' so drop it
         return adcout
 
-def watch_the_pot():
+# change these as desired - they're the pins connected from the
+# SPI port on the ADC to the Cobbler
+SPICLK = 18
+SPIMISO = 23
+SPIMOSI = 24
+SPICS = 25
 
+# set up the SPI interface pins
+GPIO.setup(SPIMOSI, GPIO.OUT)
+GPIO.setup(SPIMISO, GPIO.IN)
+GPIO.setup(SPICLK, GPIO.OUT)
+GPIO.setup(SPICS, GPIO.OUT)
+
+# 10k trim pot connected to adc #0
+potentiometer_adc = 0;
+
+last_read = 0       # this keeps track of the last potentiometer value
+tolerance = 5       # to keep from being jittery we'll only change
+                    # volume when the pot has moved more than 5 'counts'
+
+while True:
+        # we'll assume that the pot didn't move
+        trim_pot_changed = False
+
+        # read the analog pin
+        trim_pot = readadc(potentiometer_adc, SPICLK, SPIMOSI, SPIMISO, SPICS)
+        # how much has it changed since the last read?
         pot_adjust = abs(trim_pot - last_read)
 
         if DEBUG:
@@ -53,35 +76,10 @@ def watch_the_pot():
                 print "last_read", last_read
 
         if ( pot_adjust > tolerance ):
-                pot_turn = 1
-        else:
-                pot_turn = 0
+               trim_pot_changed = True
 
         if DEBUG:
-                print "pot_turn", pot_turn
-
-        return pot_turn
-                
-
-# change these as desired
-SPICLK = 18
-SPIMOSI = 17
-SPIMISO = 21
-SPICS = 22
-
-# set up the SPI interface pins
-GPIO.setup(SPIMOSI, GPIO.OUT)
-GPIO.setup(SPIMISO, GPIO.IN)
-GPIO.setup(SPICLK, GPIO.OUT)
-GPIO.setup(SPICS, GPIO.OUT)
-
-# 10k trim pot connected to adc0
-adcnum = 0;
-
-while True:
-        trim_pot = readadc(adcnum, SPICLK, SPIMOSI, SPIMISO, SPICS)
-
-        trim_pot_changed = watch_the_pot()
+                print "trim_pot_changed", trim_pot_changed
 
         if ( trim_pot_changed ):
                 set_volume = trim_pot / 10.24           # convert 10bit adc0 (0-1024) trim pot read into 0-100 volume level
@@ -97,5 +95,7 @@ while True:
                         print "set_volume", set_volume
                         print "tri_pot_changed", set_volume
 
+        # save the potentiometer reading for the next loop
         last_read = trim_pot
+        # hang out and do nothing for a half second
         time.sleep(0.5)
