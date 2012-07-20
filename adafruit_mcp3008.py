@@ -79,7 +79,6 @@ GPIO.setup(SPICS, GPIO.OUT)
 adcnum = 0;
 
 while True:
-
         trim_pot = readadc(adcnum, SPICLK, SPIMOSI, SPIMISO, SPICS)
 
         trim_pot_changed = watch_the_pot()
