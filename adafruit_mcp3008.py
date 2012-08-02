@@ -38,7 +38,7 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
 
         GPIO.output(cspin, True)
         
-        adcout /= 2       # first bit is 'null' so drop it
+        adcout >>= 1       # first bit is 'null' so drop it
         return adcout
 
 # change these as desired - they're the pins connected from the
