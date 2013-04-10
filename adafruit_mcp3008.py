@@ -57,45 +57,41 @@ GPIO.setup(SPICS, GPIO.OUT)
 # 10k trim pot connected to adc #0
 potentiometer_adc = 0;
 
-last_read = 0       # this keeps track of the last potentiometer value
-tolerance = 5       # to keep from being jittery we'll only change
-                    # volume when the pot has moved more than 5 'counts'
+SENSOR_ACTIVE_THRESHOLD = 700		# threshold in ADC counts
+SENSOR_READ_INTERVAL = 1		# interval in seconds
+MAX_SERVER_UPDATE_INTERVAL = 60		# interval in seconds
+FILTER_SAMPLES = 5			# samples to average
+
+sensor_hist = list()     # this keeps track of the last potentiometer value
+last_state = None
+last_update_time = 0
 
 while True:
-        # we'll assume that the pot didn't move
-        trim_pot_changed = False
-
         # read the analog pin
-        trim_pot = readadc(potentiometer_adc, SPICLK, SPIMOSI, SPIMISO, SPICS)
-        # how much has it changed since the last read?
-        pot_adjust = abs(trim_pot - last_read)
+        sensor_counts = readadc(potentiometer_adc, SPICLK, SPIMOSI, SPIMISO, SPICS)
+	if len(sensor_hist) > FILTER_SAMPLES:
+		del sensor_hist[0]
+        sensor_hist.append(sensor_counts)
+
+	sensor_avg = sum(sensor_hist)/len(sensor_hist)
+	sensor_state = sensor_avg > SENSOR_ACTIVE_THRESHOLD
 
         if DEBUG:
-                print "trim_pot:", trim_pot
-                print "pot_adjust:", pot_adjust
-                print "last_read", last_read
-
-        if ( pot_adjust > tolerance ):
-               trim_pot_changed = True
-
-        if DEBUG:
-                print "trim_pot_changed", trim_pot_changed
-
-        if ( trim_pot_changed ):
-                set_volume = trim_pot / 10.24           # convert 10bit adc0 (0-1024) trim pot read into 0-100 volume level
-                set_volume = round(set_volume)          # round out decimal value
-                set_volume = int(set_volume)            # cast volume as integer
-
-                print 'Volume = {volume}%' .format(volume = set_volume)
-                set_vol_cmd = 'sudo amixer cset numid=1 -- {volume}% > /dev/null' .format(volume = set_volume)
-                os.system(set_vol_cmd)  # set volume
+                print ("sensor_counts:", sensor_counts, 
+			" sensor_avg:", sensor_avg, 
+			" sensor_state: ", sensor_state)
 
 
-                if DEBUG:
-                        print "set_volume", set_volume
-                        print "tri_pot_changed", set_volume
+	if (sensor_state != last_state
+			or int(time.time()) - last_update_time > MAX_SERVER_UPDATE_INTERVAL):
+		#update_server_state(sensor_state)
+		last_update_time = int(time.time())
+		last_state = sensor_state
 
-        # save the potentiometer reading for the next loop
-        last_read = trim_pot
         # hang out and do nothing for a half second
-        time.sleep(0.5)
+        time.sleep(SENSOR_READ_INTERVAL)
+
+SENSOR_ID = "upstairs-wc"
+SERVER_UPDATE_URL = "https://hswc.herokuapp.com/update"
+#def update_server_state(state):
+	#sensor_val = "1" if state else "0"
