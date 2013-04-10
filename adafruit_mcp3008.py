@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import time
+import urllib
 import os
 import RPi.GPIO as GPIO
 
@@ -40,6 +41,30 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
         
         adcout >>= 1       # first bit is 'null' so drop it
         return adcout
+
+SENSOR_ID = "upstairs-wc"
+SERVER_UPDATE_URL = "https://hswc.herokuapp.com/update"
+def update_server_state(state):
+	global SENSOR_ID
+	global SERVER_UPDATE_URL
+
+	sensor_val = "1" if state else "0"
+
+	params = {}
+	params['sensor_id'] = SENSOR_ID
+	params['sensor_val'] = sensor_val
+	params = urllib.urlencode(params)
+
+	try:
+		f = urllib.urlopen(SERVER_UPDATE_URL, params)
+	except IOError as e:
+		if DEBUG:
+			print "I/O error %s: %s" % (e.errno, e.strerror)
+			print "Connection error on HTTP POST to %s" % SERVER_UPDATE_URL
+		return False
+
+	return f.getcode() == 200
+
 
 # change these as desired - they're the pins connected from the
 # SPI port on the ADC to the Cobbler
@@ -84,14 +109,9 @@ while True:
 
 	if (sensor_state != last_state
 			or int(time.time()) - last_update_time > MAX_SERVER_UPDATE_INTERVAL):
-		#update_server_state(sensor_state)
-		last_update_time = int(time.time())
-		last_state = sensor_state
+		if update_server_state(sensor_state):
+			last_update_time = int(time.time())	# update was successful
+			last_state = sensor_state
 
         # hang out and do nothing for a half second
         time.sleep(SENSOR_READ_INTERVAL)
-
-SENSOR_ID = "upstairs-wc"
-SERVER_UPDATE_URL = "https://hswc.herokuapp.com/update"
-#def update_server_state(state):
-	#sensor_val = "1" if state else "0"
