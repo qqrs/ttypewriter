@@ -12,7 +12,7 @@ def main():
     SPICS = 25
 
     adc = adc_spi.ADC_SPI(SPICLK, SPIMOSI, SPIMISO, SPICS)
-    #adc.initadc()
+    adc.initadc()
 
     ADC_CHANNEL = 0;                # adc channel to read
     SENSOR_READ_INTERVAL = 1		# read interval in seconds
