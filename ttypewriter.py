@@ -44,7 +44,7 @@ def get_cal_keypress(adc, ch):
             avg = calc_keypress_avg(pressed_reads)
             pressed_reads = []
             if avg == 0:
-                logging.info("invalid keypress")
+                logging.debug("invalid keypress")
             else:
                 return avg
 
@@ -75,10 +75,14 @@ def main():
                         help="print raw adc values")
     parser.add_option("-c", "--cal", action="store_true", default=False,
                         help="perform calibration")
+    parser.add_option("-v", "--verbose", action="count", dest="verbosity",
+                        help="debugging verbosity v:info vv:debug")
     (opts, args) = parser.parse_args()
 
     ADC_CHANNEL = 0;                # adc channel to read
     adc = setup()
+
+    print verbosity
 
     if opts.debugraw:
         debug_raw(adc, ADC_CHANNEL)
