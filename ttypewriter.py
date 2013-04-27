@@ -35,7 +35,7 @@ def get_cal_keypress(adc, ch):
 
     pressed_reads = []
     while True:
-        #time.sleep(SENSOR_READ_INTERVAL)
+        time.sleep(SENSOR_READ_INTERVAL)
         counts = adc.readadc(ch)
         if counts > KEYPRESS_THRESHOLD:                 # key is pressed
             if len(pressed_reads) == 0:
