@@ -42,13 +42,16 @@ def get_cal_keypress(adc, ch):
     pressed_reads = []
     while True:
         counts = adc.readadc(ch)
-        logging.debug("counts: %4d" % counts)
         if counts > KEYPRESS_THRESHOLD:
+            logging.debug("counts: %4d" % counts)
             pressed_reads.append(counts)
         elif len(pressed_reads) > 0:
             break
 
-    return sum(pressed_reads)/len(pressed_reads)
+    avg = sum(pressed_reads)/len(pressed_reads)
+    max_outlier = max([abs(x - avg) for x in pressed_reads])
+    logging.info("keypress: avg=%4d max_outlier=%2d" % (avg, max_outlier))
+    return avg
 
 
 
@@ -62,7 +65,7 @@ def main():
                 help="print raw adc values")
     parser.add_option("-c", "--cal", action="callback", 
                 callback=calibrate_callback, callback_args=(adc,ADC_CHANNEL),
-                help="print raw adc values")
+                help="perform calibration")
     (options, args) = parser.parse_args()
 
 
