@@ -42,7 +42,7 @@ def main():
 
     parser = OptionParser()
     parser.add_option("-d", "--debugraw", action="callback", 
-                    callback=callback_test, callback_args=(adc,),
+                    callback=debug_raw_callback, callback_args=(adc,),
                     help="print raw adc values")
     (options, args) = parser.parse_args()
 
