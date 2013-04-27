@@ -44,12 +44,12 @@ def get_cal_keypress(adc, ch):
         elif len(pressed_reads) > 0:
             break
 
-    if len(pressed_reads) < KEYPRESS_MIN_LENGTH):
+    if len(pressed_reads) < KEYPRESS_MIN_LENGTH:
         return 0
 
     avg = sum(pressed_reads)/len(pressed_reads)
     filtered_reads = [x for x in pressed_reads if abs(x-avg) < KEYPRESS_OUTLIER]
-    if len(filtered_reads) == ):
+    if len(filtered_reads) == 0:
         return 0
 
     avg = sum(pressed_reads)/len(pressed_reads)
