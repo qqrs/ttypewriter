@@ -34,7 +34,7 @@ def debug_raw(adc):
         handle_read(counts)
         dt = time.time() - start_time
         start_time = time.time()
-        logging.debug("counts: %d dt=%f" % (counts, dt))
+        logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
 def main():
