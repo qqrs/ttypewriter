@@ -31,9 +31,11 @@ def debug_raw(adc, ch):
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
     KEYPRESS_THRESHOLD = 5
+    SENSOR_READ_INTERVAL = 0.01      # read interval in seconds 
 
     pressed_reads = []
     while True:
+        time.sleep(SENSOR_READ_INTERVAL)
         counts = adc.readadc(ch)
         if counts > KEYPRESS_THRESHOLD:
             logging.debug("counts: %4d" % counts)
