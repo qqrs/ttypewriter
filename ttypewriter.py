@@ -32,6 +32,9 @@ def debug_raw(adc, ch):
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
     KEYPRESS_THRESHOLD = 5
+    KEYPRESS_MIN_LENGTH = 15
+    KEYPRESS_OUTLIER = 12
+
     pressed_reads = []
     while True:
         counts = adc.readadc(ch)
@@ -41,9 +44,18 @@ def get_cal_keypress(adc, ch):
         elif len(pressed_reads) > 0:
             break
 
+    if len(pressed_reads) < KEYPRESS_MIN_LENGTH):
+        return 0
+
+    avg = sum(pressed_reads)/len(pressed_reads)
+    filtered_reads = [x for x in pressed_reads if abs(x-avg) < KEYPRESS_OUTLIER]
+    if len(filtered_reads) == ):
+        return 0
+
     avg = sum(pressed_reads)/len(pressed_reads)
     max_outlier = max([abs(x - avg) for x in pressed_reads])
-    logging.info("keypress: avg=%4d max_outlier=%2d" % (avg, max_outlier))
+    logging.info("keypress: avg=%4d n=%3d max_outlier=%2d" % 
+                    (avg, len(pressed_reads), max_outlier))
     return avg
 
 
