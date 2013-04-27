@@ -29,11 +29,10 @@ def debug_raw(adc, ch):
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
+
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
     KEYPRESS_THRESHOLD = 5
-    KEYPRESS_MIN_LENGTH = 15
-    KEYPRESS_OUTLIER = 12
 
     pressed_reads = []
     while True:
@@ -42,20 +41,30 @@ def get_cal_keypress(adc, ch):
             logging.debug("counts: %4d" % counts)
             pressed_reads.append(counts)
         elif len(pressed_reads) > 0:
-            break
+            avg = calc_keypress_avg(pressed_reads)
+            pressed_reads = []
+            if avg == 0:
+                logging.info("invalid keypress")
+            else:
+                return avg
 
-    if len(pressed_reads) < KEYPRESS_MIN_LENGTH:
+
+def calc_keypress_avg(reads):
+    """ Calculate average position of keypress if valid """
+    KEYPRESS_MIN_LENGTH = 15
+    KEYPRESS_OUTLIER = 12
+
+    if len(reads) < KEYPRESS_MIN_LENGTH:
         return 0
-
-    avg = sum(pressed_reads)/len(pressed_reads)
-    filtered_reads = [x for x in pressed_reads if abs(x-avg) < KEYPRESS_OUTLIER]
+    avg = sum(reads)/len(reads)
+    filtered_reads = [x for x in reads if abs(x-avg) < KEYPRESS_OUTLIER]
     if len(filtered_reads) == 0:
         return 0
 
-    avg = sum(pressed_reads)/len(pressed_reads)
-    max_outlier = max([abs(x - avg) for x in pressed_reads])
+    avg = sum(reads)/len(reads)
+    max_outlier = max([abs(x - avg) for x in reads])
     logging.info("keypress: avg=%4d n=%3d max_outlier=%2d" % 
-                    (avg, len(pressed_reads), max_outlier))
+                    (avg, len(reads), max_outlier))
     return avg
 
 
