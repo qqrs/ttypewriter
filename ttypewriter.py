@@ -37,25 +37,29 @@ def get_cal_keypress(adc, ch):
     while True:
         time.sleep(SENSOR_READ_INTERVAL)
         counts = adc.readadc(ch)
-        if counts > KEYPRESS_THRESHOLD:
+        if counts > KEYPRESS_THRESHOLD:                 # key is pressed
+            if len(pressed_reads) == 0:
+                start_time = time.time()
             logging.debug("counts: %4d" % counts)
             pressed_reads.append(counts)
-        elif len(pressed_reads) > 0:
-            avg = calc_keypress_avg(pressed_reads)
-            pressed_reads = []
-            if avg == 0:
-                logging.debug("invalid keypress")
-            else:
-                return avg
+        else:                                           # no key pressed
+            if len(pressed_reads) > 0:                  # key just released?
+                avg = calc_keypress_avg(pressed_reads, time.time()-start_time)
+                pressed_reads = []
+                if avg == 0:
+                    logging.debug("invalid keypress")
+                else:
+                    return avg
 
 
-def calc_keypress_avg(reads):
+def calc_keypress_avg(reads, dt):
     """ Calculate average position of keypress if valid """
-    KEYPRESS_MIN_LENGTH = 15
-    KEYPRESS_OUTLIER = 12
+    KEYPRESS_MIN_LENGTH = 15        # min number of samples in keypress
+    KEYPRESS_MIN_TIME = 0.2         # time from key press to release
+    KEYPRESS_OUTLIER = 12           # max difference from average, in adc counts
 
-    if len(reads) < KEYPRESS_MIN_LENGTH:
-        return 0
+    #if len(reads) < KEYPRESS_MIN_LENGTH:
+        #return 0
     avg = sum(reads)/len(reads)
     filtered_reads = [x for x in reads if abs(x-avg) < KEYPRESS_OUTLIER]
     if len(filtered_reads) == 0:
@@ -63,8 +67,8 @@ def calc_keypress_avg(reads):
 
     avg = sum(reads)/len(reads)
     max_outlier = max([abs(x - avg) for x in reads])
-    logging.info("keypress: avg=%4d n=%3d max_outlier=%2d" % 
-                    (avg, len(reads), max_outlier))
+    logging.info("keypress: avg=%4d n=%3d dt=%0.4f max_outlier=%2d" % 
+                    (avg, len(reads), dt, max_outlier))
     return avg
 
 
