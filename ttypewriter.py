@@ -17,9 +17,6 @@ def setup():
     adc.initadc()
     return adc
 
-def debug_raw_callback(option, opt, value, parser, adc, ch):
-    debug_raw(adc, ch)
-
 def debug_raw(adc, ch):
     """ Read ADC continuously and print raw read values """
     SENSOR_READ_INTERVAL = 0.1      # read interval in seconds 
@@ -31,10 +28,6 @@ def debug_raw(adc, ch):
         start_time = time.time()
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
-
-def calibrate_callback(option, opt, value, parser, adc, ch):
-    while True:
-        print "keypress: %4d" % get_cal_keypress(adc, ch)
 
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
@@ -56,17 +49,22 @@ def get_cal_keypress(adc, ch):
 
 
 def main():
+    parser = OptionParser()
+    parser.add_option("-d", "--debugraw", action="store_true", default=False,
+                        help="print raw adc values")
+    parser.add_option("-c", "--cal", action="store_true", default=False,
+                        help="perform calibration")
+    (opts, args) = parser.parse_args()
+
     ADC_CHANNEL = 0;                # adc channel to read
     adc = setup()
 
-    parser = OptionParser()
-    parser.add_option("-d", "--debugraw", action="callback", 
-                callback=debug_raw_callback, callback_args=(adc,ADC_CHANNEL),
-                help="print raw adc values")
-    parser.add_option("-c", "--cal", action="callback", 
-                callback=calibrate_callback, callback_args=(adc,ADC_CHANNEL),
-                help="perform calibration")
-    (options, args) = parser.parse_args()
+    if opts.debugraw:
+        debug_raw(adc, ADC_CHANNEL)
+    elif opts.cal:
+        while True:
+            get_cal_keypress(adc, ADC_CHANNEL)
+
 
 
 if __name__ == "__main__":
