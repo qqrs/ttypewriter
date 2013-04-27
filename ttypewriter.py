@@ -42,7 +42,7 @@ def get_cal_keypress(adc, ch):
     pressed_reads = []
     while True:
         counts = adc.readadc(ch)
-        logging.debug("counts: %4d dt=%.3f" % (counts, dt))
+        logging.debug("counts: %4d" % counts)
         if counts > KEYPRESS_THRESHOLD:
             pressed_reads.append(counts)
         elif len(pressed_reads) > 0:
