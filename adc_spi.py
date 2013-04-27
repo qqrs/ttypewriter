@@ -15,6 +15,9 @@ class ADC_SPI(object):
         GPIO.setup(self.clockpin, GPIO.OUT)
         GPIO.setup(self.cspin, GPIO.OUT)
 
+    def cleanup(self):
+        GPIO.cleanup()
+
     # read SPI data from MCP3008 chip, 8 possible adc's (0 thru 7)
     def readadc(self, adcnum):
             if ((adcnum > 7) or (adcnum < 0)):

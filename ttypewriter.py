@@ -65,6 +65,8 @@ def main():
         while True:
             get_cal_keypress(adc, ADC_CHANNEL)
 
+    adc.cleanup()
+
 
 
 if __name__ == "__main__":
