@@ -4,10 +4,6 @@ import adc_spi
 import logging
 from optparse import OptionParser
 
-def handle_read(counts):
-    if counts < 5:
-        return
-
 def setup():
     logging.getLogger().setLevel(logging.DEBUG)
 
@@ -21,29 +17,52 @@ def setup():
     adc.initadc()
     return adc
 
-def debug_raw_callback(option, opt, value, parser, adc):
-    debug_raw(adc)
+def debug_raw_callback(option, opt, value, parser, adc, ch):
+    debug_raw(adc, ch)
 
-def debug_raw(adc):
-    ADC_CHANNEL = 0;                # adc channel to read
+def debug_raw(adc, ch):
+    """ Read ADC continuously and print raw read values """
     SENSOR_READ_INTERVAL = 0.1      # read interval in seconds 
                                     # max speed is ~ 300 sps
     start_time = 0
     while True:
-        counts = adc.readadc(ADC_CHANNEL)
-        handle_read(counts)
+        counts = adc.readadc(ch)
         dt = time.time() - start_time
         start_time = time.time()
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
+def calibrate_callback(option, opt, value, parser, adc, ch):
+    while True:
+        print "keypress: %4d" % get_cal_keypress(adc, ch)
+
+def get_cal_keypress(adc, ch):
+    """ Store ADC values from key press to key release and return average """
+    KEYPRESS_THRESHOLD = 5
+    pressed_reads = []
+    while True:
+        counts = adc.readadc(ch)
+        logging.debug("counts: %4d dt=%.3f" % (counts, dt))
+        if counts > KEYPRESS_THRESHOLD:
+            pressed_reads.append(counts)
+        elif len(pressed_reads) > 0:
+            break
+
+    return sum(pressed_reads)/len(pressed_reads)
+
+
+
 def main():
+    ADC_CHANNEL = 0;                # adc channel to read
     adc = setup()
 
     parser = OptionParser()
     parser.add_option("-d", "--debugraw", action="callback", 
-                    callback=debug_raw_callback, callback_args=(adc,),
-                    help="print raw adc values")
+                callback=debug_raw_callback, callback_args=(adc,ADC_CHANNEL),
+                help="print raw adc values")
+    parser.add_option("-c", "--cal", action="callback", 
+                callback=calibrate_callback, callback_args=(adc,ADC_CHANNEL),
+                help="print raw adc values")
     (options, args) = parser.parse_args()
 
 
