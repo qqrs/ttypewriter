@@ -35,7 +35,7 @@ def get_cal_keypress(adc, ch):
 
     pressed_reads = []
     while True:
-        time.sleep(SENSOR_READ_INTERVAL)
+        #time.sleep(SENSOR_READ_INTERVAL)
         counts = adc.readadc(ch)
         if counts > KEYPRESS_THRESHOLD:                 # key is pressed
             if len(pressed_reads) == 0:
@@ -54,12 +54,12 @@ def get_cal_keypress(adc, ch):
 
 def calc_keypress_avg(reads, dt):
     """ Calculate average position of keypress if valid """
-    KEYPRESS_MIN_LENGTH = 15        # min number of samples in keypress
-    KEYPRESS_MIN_TIME = 0.2         # time from key press to release
+    KEYPRESS_MIN_LENGTH = 3         # min number of samples in keypress
+    KEYPRESS_MIN_TIME = 0.1         # time from key press to release
     KEYPRESS_OUTLIER = 12           # max difference from average, in adc counts
 
-    #if len(reads) < KEYPRESS_MIN_LENGTH:
-        #return 0
+    if len(reads) < KEYPRESS_MIN_LENGTH or dt < KEYPRESS_MIN_TIME:
+        return 0
     avg = sum(reads)/len(reads)
     filtered_reads = [x for x in reads if abs(x-avg) < KEYPRESS_OUTLIER]
     if len(filtered_reads) == 0:
