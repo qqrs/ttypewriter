@@ -5,8 +5,6 @@ import logging
 from optparse import OptionParser
 
 def setup():
-    logging.getLogger().setLevel(logging.DEBUG)
-
     # Raspberry PI expansion bus GPIO pins to use for SPI bus
     SPICLK = 18
     SPIMISO = 23
@@ -82,7 +80,9 @@ def main():
     ADC_CHANNEL = 0;                # adc channel to read
     adc = setup()
 
-    print opts.verbosity
+    if opts.verbosity is not None:
+        level = logging.DEBUG if opts.verbosity > 1 else logging.INFO
+        logging.getLogger().setLevel(level)
 
     if opts.debugraw:
         debug_raw(adc, ADC_CHANNEL)
