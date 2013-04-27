@@ -82,7 +82,7 @@ def main():
     ADC_CHANNEL = 0;                # adc channel to read
     adc = setup()
 
-    print verbosity
+    print opts.verbosity
 
     if opts.debugraw:
         debug_raw(adc, ADC_CHANNEL)
