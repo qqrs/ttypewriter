@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import time
 import string
-import json
 import logging
 from optparse import OptionParser
 from adc_spi import ADC_SPI
@@ -18,15 +17,46 @@ def debug_raw(adc, ch):
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
+# TODO: support sequential presses with a full release between them
+def typewriter(adc, ch, calfile):
+    """ Load calibration and decode typewriter keypresses """
+    (keycodes, seps) = load_calfile(calfile)
+    while True:
+        code = get_cal_keypress(adc, ch)
+        print lookup_key(keycodes, seps, code)
+
+def lookup_key(keycodes, seps, code):
+    """ Find key for keycode by binary search """
+    i = bisect_left(seps, code)
+    return keycodes[i][1]
+
+# TODO: check for empty file
+def load_calfile(calfile)
+    """ Load calibration from file and calculate separators between keys """
+    with open(calfile, "r") as f:
+        keycodes = pickle.load(f)
+    keycodes.sort(key=lambda (code,key): code)
+    seps = calc_seppoints(keycodes)
+    return (keycodes, seps)
+
+def calc_seppoints(keycodes):
+    """ Calculate separation points between keycodes: int avg of adjacent """
+    it_left = iter(keycodes)
+    it_right = iter(keycodes)
+    it_right.next()
+    seps = [(x+y)/2 for ((x,key),(y,_)) in zip(it_left, it_right)]
+    return seps
+
+# TODO: read each key multiple times and check for consensus
 def calibrate(adc, ch, calfile):
     """ Calibrate and store to calfile """
     keys = string.ascii_lowercase + string.digits + "-!:@,./" # typewriter keys
     keys = keys.translate(None, "q1")       # remove keys that don't exist
-    keycodes = {}
+    keycodes = []
     for key in keys:
         print "Press key %s" % key
         code = get_cal_keypress(adc, ch)
-        keycodes[key] = code
+        keycodes.append((code, key))
         print "Got key %s: %4d" % (key, code)
         print
     with open(calfile, "w") as f:
@@ -109,6 +139,8 @@ def main():
             debug_raw(adc, ADC_CHANNEL)
         elif opts.cal:
             calibrate(adc, ADC_CHANNEL, opts.calfile)
+        else:
+            typewriter(adc, ADC_CHANNEL, opts.calfile)
 
 
 
