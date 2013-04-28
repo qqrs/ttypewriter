@@ -72,11 +72,14 @@ def main():
                         help="print raw adc values")
     parser.add_option("-c", "--cal", action="store_true", default=False,
                         help="perform calibration")
-    parser.add_option("-v", "--verbose", action="count", dest="verbosity",
+    parser.add_option("-f", "--calfile", action="store", default="cal.dat",
+                        help="calibration file to use")
+    parser.add_option("-v", "--verbose", action="count", default=0,
+                        dest="verbosity",
                         help="debugging verbosity v:info vv:debug")
     (opts, args) = parser.parse_args()
 
-    if opts.verbosity is not None:
+    if opts.verbosity > 0:
         level = logging.DEBUG if opts.verbosity > 1 else logging.INFO
         logging.getLogger().setLevel(level)
 
