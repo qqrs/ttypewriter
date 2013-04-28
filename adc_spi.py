@@ -7,6 +7,12 @@ class ADC_SPI(object):
         self.misopin  = misopin
         self.cspin    = cspin  
 
+    def __enter__(self):
+        self.initadc()
+
+    def __exit__(self):
+        self.cleanup()
+
     def initadc(self):
         GPIO.setmode(GPIO.BCM)
 

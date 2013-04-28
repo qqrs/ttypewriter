@@ -1,19 +1,8 @@
 #!/usr/bin/env python
 import time
-import adc_spi
+from adc_spi import ADC_SPI
 import logging
 from optparse import OptionParser
-
-def setup():
-    # Raspberry PI expansion bus GPIO pins to use for SPI bus
-    SPICLK = 18
-    SPIMISO = 23
-    SPIMOSI = 24
-    SPICS = 25
-
-    adc = adc_spi.ADC_SPI(SPICLK, SPIMOSI, SPIMISO, SPICS)
-    adc.initadc()
-    return adc
 
 def debug_raw(adc, ch):
     """ Read ADC continuously and print raw read values """
@@ -87,20 +76,22 @@ def main():
                         help="debugging verbosity v:info vv:debug")
     (opts, args) = parser.parse_args()
 
-    ADC_CHANNEL = 0;                # adc channel to read
-    adc = setup()
-
     if opts.verbosity is not None:
         level = logging.DEBUG if opts.verbosity > 1 else logging.INFO
         logging.getLogger().setLevel(level)
 
-    if opts.debugraw:
-        debug_raw(adc, ADC_CHANNEL)
-    elif opts.cal:
-        while True:
-            get_cal_keypress(adc, ADC_CHANNEL)
+    ADC_CHANNEL = 0;            # ADC channel to read
+    SPICLK = 18                 # RPI expansion bus GPIO pins to use for SPI bus
+    SPIMISO = 23
+    SPIMOSI = 24
+    SPICS = 25
 
-    adc.cleanup()
+    with ADC_SPI(SPICLK, SPIMOSI, SPIMISO, SPICS) as adc:
+        if opts.debugraw:
+            debug_raw(adc, ADC_CHANNEL)
+        elif opts.cal:
+            while True:
+                get_cal_keypress(adc, ADC_CHANNEL)
 
 
 
