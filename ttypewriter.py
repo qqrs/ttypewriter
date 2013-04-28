@@ -65,8 +65,8 @@ def calc_keypress_avg(reads, dt):
     if len(filtered_reads) == 0:
         return 0
 
-    avg = sum(reads)/len(reads)
-    max_outlier = max([abs(x - avg) for x in reads])
+    avg = sum(filtered_reads)/len(reads)
+    max_outlier = max([abs(x - avg) for x in filtered_reads])
     logging.info("keypress: avg=%4d n=%3d dt=%0.4f max_outlier=%2d" % 
                     (avg, len(reads), dt, max_outlier))
     return avg
