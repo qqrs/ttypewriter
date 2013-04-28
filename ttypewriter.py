@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import time
-from adc_spi import ADC_SPI
+import string
+import pickle
 import logging
 from optparse import OptionParser
+from adc_spi import ADC_SPI
 
 def debug_raw(adc, ch):
     """ Read ADC continuously and print raw read values """
@@ -18,9 +20,17 @@ def debug_raw(adc, ch):
 
 def calibrate(adc, ch, calfile):
     """ Calibrate and store to calfile """
-    while True:
-        pos = get_cal_keypress(adc, ch)
-        print "x"
+    keys = string.ascii_lowercase + string.digits + "-!:@,./" # typewriter keys
+    keys = keys.translate(None, "q1")       # remove keys that don't exist
+    keycodes = {}
+    for key in keys:
+        print "Press key %s" % key
+        code = get_cal_keypress(adc, ch)
+        keycodes[key] = code
+        print "Got key %s: %4d" % (key, code)
+        print
+    with open(calfile, "w") as f:
+        pickle.dump(keycodes, f)
 
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
