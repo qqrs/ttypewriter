@@ -3,6 +3,7 @@ import time
 import string
 import logging
 import pickle
+from bisect import bisect_left
 from optparse import OptionParser
 from adc_spi import ADC_SPI
 
@@ -49,6 +50,7 @@ def calc_seppoints(keycodes):
     return seps
 
 # TODO: read each key multiple times and check for consensus
+# TODO: check for keys with duplicate code
 def calibrate(adc, ch, calfile):
     """ Calibrate and store to calfile """
     keys = string.ascii_lowercase + string.digits + "-!:@,./" # typewriter keys
