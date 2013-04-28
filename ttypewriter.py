@@ -29,7 +29,7 @@ def typewriter(adc, ch, calfile):
         code = get_cal_keypress(adc, ch)
         key = lookup_key(keycodes, seps, code)
         sys.stdout.write(key)
-        sys.stdout.flush
+        sys.stdout.flush()
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
