@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import time
 import string
-import pickle
+import json
 import logging
 from optparse import OptionParser
 from adc_spi import ADC_SPI
@@ -33,7 +33,7 @@ def calibrate(adc, ch, calfile):
         pickle.dump(keycodes, f)
 
 def get_cal_keypress(adc, ch):
-    """ Store ADC values from key press to key release and return average """
+    """ Wait for press -- return avg ADC value from key press to key release """
     KEYPRESS_THRESHOLD = 5
     SENSOR_READ_INTERVAL = 0.01      # read interval in seconds 
 
