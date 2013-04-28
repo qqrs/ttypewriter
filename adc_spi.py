@@ -10,7 +10,7 @@ class ADC_SPI(object):
     def __enter__(self):
         self.initadc()
 
-    def __exit__(self):
+    def __exit__(self, etype, value, traceback):
         self.cleanup()
 
     def initadc(self):
