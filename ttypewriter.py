@@ -2,6 +2,7 @@
 import time
 import string
 import logging
+import pickle
 from optparse import OptionParser
 from adc_spi import ADC_SPI
 
