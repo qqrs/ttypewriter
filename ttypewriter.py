@@ -19,7 +19,7 @@ def debug_raw(adc, ch):
 def calibrate(adc, ch, calfile):
     """ Calibrate and store to calfile """
     while True:
-        pos = get_cal_keypress(adc, ADC_CHANNEL)
+        pos = get_cal_keypress(adc, ch)
         print "x"
 
 def get_cal_keypress(adc, ch):
