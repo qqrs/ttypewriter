@@ -31,7 +31,7 @@ def lookup_key(keycodes, seps, code):
     return keycodes[i][1]
 
 # TODO: check for empty file
-def load_calfile(calfile)
+def load_calfile(calfile):
     """ Load calibration from file and calculate separators between keys """
     with open(calfile, "r") as f:
         keycodes = pickle.load(f)
