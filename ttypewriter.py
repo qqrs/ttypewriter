@@ -25,7 +25,8 @@ def typewriter(adc, ch, calfile):
     (keycodes, seps) = load_calfile(calfile)
     while True:
         code = get_cal_keypress(adc, ch)
-        print lookup_key(keycodes, seps, code),
+        key = lookup_key(keycodes, seps, code),
+        print key,
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
