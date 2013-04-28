@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+import sys
 import time
 import string
 import logging
@@ -26,7 +28,8 @@ def typewriter(adc, ch, calfile):
     while True:
         code = get_cal_keypress(adc, ch)
         key = lookup_key(keycodes, seps, code)
-        print key,
+        sys.stdout.write(key)
+        sys.stdout.flush
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
