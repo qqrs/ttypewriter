@@ -16,6 +16,11 @@ def debug_raw(adc, ch):
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
+def calibrate(adc, ch, calfile):
+    """ Calibrate and store to calfile """
+    while True:
+        pos = get_cal_keypress(adc, ADC_CHANNEL)
+        print "x"
 
 def get_cal_keypress(adc, ch):
     """ Store ADC values from key press to key release and return average """
@@ -93,8 +98,7 @@ def main():
         if opts.debugraw:
             debug_raw(adc, ADC_CHANNEL)
         elif opts.cal:
-            while True:
-                get_cal_keypress(adc, ADC_CHANNEL)
+            calibrate(adc, ADC_CHANNEL, opts.calfile)
 
 
 
