@@ -1,7 +1,7 @@
-import RPi.GPIO as GPIO
-
 class ADC_SPI(object):
     def __init__(self, clockpin, mosipin, misopin, cspin):
+        import RPi.GPIO as GPIO     # import here to allow unit testing on PC
+
         self.clockpin = clockpin
         self.mosipin  = mosipin
         self.misopin  = misopin
