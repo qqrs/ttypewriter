@@ -55,7 +55,7 @@ def calc_seppoints(keycodes):
     it_right = iter(keycodes)
     it_right.next()
     seps = [(x+y)/2 for ((x,key),(y,_)) in zip(it_left, it_right)]
-    assert(len(seps) == len(keycodes) + 1)
+    assert(len(seps) == len(keycodes) - 1)
     return seps
 
 # TODO: read each key multiple times and check for consensus
