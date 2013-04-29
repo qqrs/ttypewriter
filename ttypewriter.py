@@ -10,7 +10,7 @@ from optparse import OptionParser
 from adc_spi import ADC_SPI
 
 def debug_raw(adc, ch):
-    """ Read ADC continuously and print raw read values """
+    """ Read ADC continuously and print raw values """
     SENSOR_READ_INTERVAL = 0.1      # read interval in seconds 
                                     # max speed is ~ 300 sps
     start_time = 0
@@ -21,9 +21,9 @@ def debug_raw(adc, ch):
         logging.debug("counts: %4d dt=%.3f" % (counts, dt))
         time.sleep(SENSOR_READ_INTERVAL)
 
-# TODO: support sequential presses with a full release between them
+# TODO: support sequential presses without a full release between them
 def typewriter(adc, ch, calfile):
-    """ Load calibration and decode typewriter keypresses """
+    """ Load calibration and decode typewriter keypresses to stdout """
     (keycodes, seps) = load_calfile(calfile)
     while True:
         code = get_cal_keypress(adc, ch)
@@ -33,6 +33,10 @@ def typewriter(adc, ch, calfile):
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
+    ADC_MIN = 0
+    ADC_MAX = 1023
+    if code < ADC_MIN or code > ADC_MAX:
+        raise ValueError("Key code out of range")
     i = bisect_left(seps, code)
     return keycodes[i][1]
 
@@ -46,15 +50,16 @@ def load_calfile(calfile):
     return (keycodes, seps)
 
 def calc_seppoints(keycodes):
-    """ Calculate separation points between keycodes: int avg of adjacent """
+    """ Calculate separation point between keycodes: int avg of adjacent pts """
     it_left = iter(keycodes)
     it_right = iter(keycodes)
     it_right.next()
     seps = [(x+y)/2 for ((x,key),(y,_)) in zip(it_left, it_right)]
+    assert(len(seps) == len(keycodes) + 1)
     return seps
 
 # TODO: read each key multiple times and check for consensus
-# TODO: check for keys with duplicate code
+# TODO: check for multiple keys using the same keycode
 def calibrate(adc, ch, calfile):
     """ Calibrate and store to calfile """
     keys = string.ascii_lowercase + string.digits + "-!:@,./" # typewriter keys
@@ -71,8 +76,8 @@ def calibrate(adc, ch, calfile):
 
 def get_cal_keypress(adc, ch):
     """ Wait for press -- return avg ADC value from key press to key release """
-    KEYPRESS_THRESHOLD = 5
-    SENSOR_READ_INTERVAL = 0.01      # read interval in seconds 
+    KEYPRESS_THRESHOLD = 5       # ADC read <= threshold mean all keys released 
+    SENSOR_READ_INTERVAL = 0.01  # ADC sample delay in seconds 
 
     pressed_reads = []
     while True:
@@ -84,7 +89,7 @@ def get_cal_keypress(adc, ch):
             logging.debug("counts: %4d" % counts)
             pressed_reads.append(counts)
         else:                                           # no key pressed
-            if len(pressed_reads) > 0:                  # key just released?
+            if len(pressed_reads) > 0:                  # key was just released
                 avg = calc_keypress_avg(pressed_reads, time.time()-start_time)
                 pressed_reads = []
                 if avg == 0:
@@ -94,7 +99,8 @@ def get_cal_keypress(adc, ch):
 
 
 def calc_keypress_avg(reads, dt):
-    """ Calculate average position of keypress if valid """
+    """ Check that keypress is valid and calculate keycode as average position. 
+        Return 0 if not a valid key press. """
     KEYPRESS_MIN_LENGTH = 3         # min number of samples in keypress
     KEYPRESS_MIN_TIME = 0.1         # time from key press to release
     KEYPRESS_OUTLIER = 12           # max difference from median, in adc counts
@@ -102,6 +108,8 @@ def calc_keypress_avg(reads, dt):
     if len(reads) < KEYPRESS_MIN_LENGTH or dt < KEYPRESS_MIN_TIME:
         return 0
     med = median(reads)
+
+    # filter outliers with respect to median value
     filtered_reads = [x for x in reads if abs(x-med) < KEYPRESS_OUTLIER]
     if len(filtered_reads) == 0:
         return 0
