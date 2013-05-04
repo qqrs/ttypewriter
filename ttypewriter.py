@@ -38,8 +38,8 @@ def typewriter(adc, ch, calfile, screen_session):
             rc = os.system("screen -S %s -X stuff '%s' > /dev/null" 
                         % (screen_session, key))
             if rc != 0:
-                raise EnvironmentError("Screen session '%s' not found", 
-                                        screen_session)
+                raise EnvironmentError(
+                        (rc, "Screen session '%s' not found" % screen_session))
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
