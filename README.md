@@ -6,9 +6,9 @@ Microchip MCP3008 analog-to-digital converter interface. Bit-bangs SPI on Raspbe
 *ttypewriter.py*:
 Typewriter calibration and keypress decoding.
 
-Run `sudo python ttypewriter.py -c` and press each key when prompted to create the calibration file.
-Run `sudo python ttypewriter.py` to decode keypresses and write characters to stdout.
-Open a screen session with `sudo screen -S <session_name>` and run `sudo python ttypewriter.py -S <session_name>` to decode keypresses and inject characters into the screen session.
+Run `sudo python ttypewriter.py -c` and press each key when prompted to create the calibration file.  
+Run `sudo python ttypewriter.py` to decode keypresses and write characters to stdout.  
+Open a screen session with `sudo screen -S <session_name>` and run `sudo python ttypewriter.py -S <session_name>` to decode keypresses and inject characters into the screen session.  
 
 
 ```
