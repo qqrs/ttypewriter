@@ -167,7 +167,7 @@ def main():
         elif opts.cal:
             calibrate(adc, ADC_CHANNEL, opts.calfile)
         else:
-            typewriter(adc, ADC_CHANNEL, opts.calfile)
+            typewriter(adc, ADC_CHANNEL, opts.calfile, opts.session)
 
 
 
