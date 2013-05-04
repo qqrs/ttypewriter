@@ -1,4 +1,4 @@
-This project interfaces a mechanical typewriter to a Raspberry Pi. 
+This project interfaces a mechanical typewriter to a Raspberry Pi using a SoftPot touch sensor. 
 
 *adc_spi.py*:
 Microchip MCP3008 analog-to-digital converter interface. Bit-bangs SPI on Raspberry Pi GPIO pins. Based on code from [Adafruit](http://learn.adafruit.com/reading-a-analog-in-and-controlling-audio-volume-with-the-raspberry-pi/overview).

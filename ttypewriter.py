@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import time
 import string
@@ -22,14 +23,23 @@ def debug_raw(adc, ch):
         time.sleep(SENSOR_READ_INTERVAL)
 
 # TODO: support sequential presses without a full release between them
-def typewriter(adc, ch, calfile):
+def typewriter(adc, ch, calfile, screen_session):
     """ Load calibration and decode typewriter keypresses to stdout """
     (keycodes, seps) = load_calfile(calfile)
     while True:
         code = get_cal_keypress(adc, ch)
         key = lookup_key(keycodes, seps, code)
-        sys.stdout.write(key)
-        sys.stdout.flush()
+        if screen_session is None:
+            # print keypress to stdout
+            sys.stdout.write(key)
+            sys.stdout.flush()
+        else:
+            # send keypress to a screen session
+            rc = os.system("screen -S %s -X stuff '%s' > /dev/null" 
+                        % (screen_session, key))
+            if rc != 0:
+                raise EnvironmentError("Screen session '%s' not found", 
+                                        screen_session)
 
 def lookup_key(keycodes, seps, code):
     """ Find key for keycode by binary search """
@@ -134,6 +144,8 @@ def main():
                         help="perform calibration")
     parser.add_option("-f", "--calfile", action="store", default="cal.dat",
                         help="calibration file to use")
+    parser.add_option("-S", "--session", action="store", default=None,
+                        help="screen session to receive keypresses")
     parser.add_option("-v", "--verbose", action="count", default=0,
                         dest="verbosity",
                         help="debugging verbosity v:info vv:debug")
